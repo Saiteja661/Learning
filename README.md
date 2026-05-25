@@ -6,6 +6,46 @@
 
 Backend Phase 1 is implemented and testable locally. Run everything from the repo root unless a command says otherwise.
 
+### Frontend Stage 2
+
+The frontend is now implemented and can run separately from the backend.
+
+#### 1) Install frontend dependencies
+
+```bash
+cd "F:/Learning Folder/Learning/frontend"
+npm install
+```
+
+#### 2) Set the frontend API URL
+
+Create `frontend/.env` from `frontend/.env.example` and keep this value:
+
+```bash
+VITE_API_URL=http://localhost:3000
+```
+
+#### 3) Run the frontend in development mode
+
+```bash
+cd "F:/Learning Folder/Learning/frontend"
+npm run dev
+```
+
+#### 4) Build the frontend for production
+
+```bash
+cd "F:/Learning Folder/Learning/frontend"
+npm run build
+```
+
+#### 5) What the frontend does
+
+- `/login` lets a user sign in.
+- `/register` creates a new user and stores the JWT.
+- `/` shows the dashboard, expense form, expense list, and category chart.
+- All API calls use `VITE_API_URL` through Axios.
+
 ### 1) Install backend dependencies
 
 ```bash
@@ -287,16 +327,24 @@ VITE_API_URL=http://localhost:3000
 ```dockerfile
 # backend/Dockerfile
  
-# Stage 1: build
-FROM node:20-alpine AS builder
+# Base image with OpenSSL for Prisma runtime
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Stage 1: build
+FROM base AS builder
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY . .
-RUN npx prisma generate
+RUN npx prisma generate --schema=src/prisma/schema.prisma
  
 # Stage 2: production
-FROM node:20-alpine AS production
+FROM base AS production
+ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
@@ -319,7 +367,6 @@ node_modules
 ## docker-compose.yml (local development)
  
 ```yaml
-version: "3.9"
 services:
   db:
     image: postgres:15-alpine
@@ -331,6 +378,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d expensedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
  
   backend:
     build: ./backend
@@ -342,7 +395,9 @@ services:
       PORT: 3000
       NODE_ENV: development
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
  
 volumes:
   pgdata:

@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/start.js",
     "dev": "nodemon src/index.js",
     "prisma:generate": "prisma generate --schema=src/prisma/schema.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=src/prisma/schema.prisma",
+    "db:push": "prisma db push --schema=src/prisma/schema.prisma",
     "migrate:dev": "prisma migrate dev --schema=src/prisma/schema.prisma --name init",
     "test": "jest --runInBand"
   },

@@ -1,0 +1,157 @@
+.page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.bgBlobOne,
+.bgBlobTwo {
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.36;
+  pointer-events: none;
+}
+
+.bgBlobOne {
+  width: 22rem;
+  height: 22rem;
+  background: #1d4ed8;
+  top: -6rem;
+  right: -4rem;
+}
+
+.bgBlobTwo {
+  width: 18rem;
+  height: 18rem;
+  background: #0f766e;
+  bottom: -5rem;
+  left: -4rem;
+}
+
+.summaryBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0.15rem;
+}
+
+.kicker {
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.summaryTitle {
+  margin: 0;
+  color: #f8fafc;
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+}
+
+.summaryControls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.monthPicker {
+  display: grid;
+  gap: 0.35rem;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+}
+
+.monthPicker input,
+.logoutButton {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.6);
+  color: #f8fafc;
+  padding: 0.8rem 1rem;
+}
+
+.logoutButton {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.alert,
+.loading {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #f8fafc;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.leftColumn,
+.rightColumn {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.insightCard {
+  padding: 1.35rem;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+}
+
+.insightTitle {
+  margin: 0 0 0.5rem;
+  color: #f8fafc;
+  font-size: 1.2rem;
+}
+
+.insightText {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .summaryControls {
+    width: 100%;
+  }
+
+  .summaryControls > * {
+    width: 100%;
+  }
+}
