@@ -1,0 +1,53 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t "$IMAGE_URI" ./backend
+          docker push "$IMAGE_URI"
+
+      - name: Update ECS service
+        env:
+          ECS_CLUSTER_NAME: ${{ secrets.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ secrets.ECS_SERVICE_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --service "$ECS_SERVICE_NAME" \
+            --force-new-deployment \
+            --region "$AWS_REGION"

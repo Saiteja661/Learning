@@ -15,6 +15,13 @@ frontend/.env
 .env.local
 .env.*.local
 
+# Terraform local config/state
+infra/backend.hcl
+infra/terraform.tfvars
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

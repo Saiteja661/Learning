@@ -1,0 +1,7 @@
+aws_region   = "ap-south-1"
+project_name = "expense-tracker"
+db_name      = "expensedb"
+db_username  = "expenseuser"
+db_password  = "change-me"
+jwt_secret   = "change-me-too"
+ecr_image_url = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/expense-tracker-backend:latest"

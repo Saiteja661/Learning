@@ -406,6 +406,50 @@ volumes:
 ---
  
 ## Terraform — AWS infrastructure
+
+### Remote state backend
+
+Terraform state should be stored in an S3 bucket, not in local files. Use a backend config file such as `infra/backend.hcl` based on `infra/backend.hcl.example`, then initialize with:
+
+```bash
+cd "F:/Learning Folder/Learning/infra"
+terraform init -backend-config=backend.hcl
+```
+
+If you already have local state and want to migrate it to S3, run:
+
+```bash
+terraform init -migrate-state -backend-config=backend.hcl
+```
+
+The S3 bucket `expense-tracker-terraform-state-saiteja` and DynamoDB lock table `expense-tracker-terraform-locks` should exist before this step.
+
+### Local variables file
+
+Terraform also needs input variables such as `db_password`, `jwt_secret`, and `ecr_image_url`. For local work, create `infra/terraform.tfvars` from `infra/terraform.tfvars.example`:
+
+```bash
+cd "F:/Learning Folder/Learning/infra"
+copy terraform.tfvars.example terraform.tfvars
+```
+
+Then edit `terraform.tfvars` and replace the placeholder values with your real values.
+
+If you do not want to use a tfvars file, you can pass values directly on the command line:
+
+```bash
+terraform plan \
+  -var="db_password=your-password" \
+  -var="jwt_secret=your-secret" \
+  -var="ecr_image_url=your-ecr-image-uri"
+```
+
+### What each local file does
+
+- `infra/backend.hcl` tells Terraform where to store remote state in S3.
+- `infra/terraform.tfvars` supplies the variables needed by the infrastructure code.
+- `infra/backend.hcl.example` and `infra/terraform.tfvars.example` are safe templates you can copy.
+- `infra/.terraform/` and `*.tfstate` files are generated locally and should not be committed.
  
 ### Variables (infra/variables.tf)
 ```hcl
@@ -587,13 +631,22 @@ jobs:
  
 ## GitHub Secrets to set up
  
-In your GitHub repo → Settings → Secrets → Actions, add these:
+In your GitHub repo → Settings → Secrets and variables → Actions, add these:
  
 | Secret name           | Value                                      |
 |-----------------------|--------------------------------------------|
 | AWS_ACCESS_KEY_ID     | IAM user access key (CI/CD permissions)    |
 | AWS_SECRET_ACCESS_KEY | IAM user secret key                        |
+| AWS_REGION            | ap-south-1 or your target AWS region       |
 | ECR_REGISTRY          | 123456789.dkr.ecr.ap-south-1.amazonaws.com |
+| ECR_REPOSITORY        | expense-tracker-backend                    |
+| ECS_CLUSTER_NAME      | expense-tracker                            |
+| ECS_SERVICE_NAME      | expense-tracker-backend                    |
+| API_URL               | Backend URL used by the frontend build     |
+| S3_BUCKET             | Frontend hosting bucket name               |
+| CLOUDFRONT_DIST_ID    | CloudFront distribution id                 |
+
+Do not commit `backend.hcl`, `terraform.tfvars`, or any `.env` file. They contain local or secret values and must stay out of the public repository.
 | S3_BUCKET             | expense-tracker-frontend-xxxx              |
 | CLOUDFRONT_DIST_ID    | EXXXXXXXXXX (from terraform output)        |
 | API_URL               | https://your-cloudfront-url.net            |
